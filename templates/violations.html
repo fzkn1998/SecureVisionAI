@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Violations Report - Safety Surveillance System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(rgba(15, 23, 42, 0.93), rgba(15, 23, 42, 0.95)), url('/static/img/image.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-card.danger .value {
+            color: #e74c3c;
+        }
+        
+        .stat-card.warning .value {
+            color: #f39c12;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        .table-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: #f8f9fa;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        th {
+            font-weight: 600;
+            color: #495057;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-danger {
+            background: #ffe5e5;
+            color: #e74c3c;
+        }
+        
+        .badge-warning {
+            background: #fff4e5;
+            color: #f39c12;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #e2e8f0;
+            font-size: 18px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 50px;
+            color: #999;
+        }
+        
+        .filters {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .filters select, .filters input {
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .filters label {
+            font-weight: 600;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚨 Safety Violations Report</h1>
+            <p>Real-time monitoring and violation tracking system</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Violations</h3>
+                <div class="value" id="totalViolations">0</div>
+            </div>
+            <div class="stat-card danger">
+                <h3>No Helmet</h3>
+                <div class="value" id="noHelmet">0</div>
+            </div>
+            <div class="stat-card warning">
+                <h3>No Vest</h3>
+                <div class="value" id="noVest">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Camera Areas</h3>
+                <div class="value" id="cameraCount">0</div>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <a href="/violations/download" class="btn btn-success">
+                <span>📥</span> Download CSV
+            </a>
+            <button onclick="refreshData()" class="btn btn-primary">
+                <span>🔄</span> Refresh
+            </button>
+            <button onclick="resetViolations()" class="btn btn-danger">
+                <span>🗑️</span> Reset All Data
+            </button>
+            <a href="/index.html" class="btn btn-primary">
+                <span>🏠</span> Back to Dashboard
+            </a>
+        </div>
+        
+        <div class="filters">
+            <label>Filter by Camera:</label>
+            <select id="cameraFilter" onchange="filterData()">
+                <option value="all">All Cameras</option>
+            </select>
+            
+            <label>Filter by Type:</label>
+            <select id="typeFilter" onchange="filterData()">
+                <option value="all">All Types</option>
+                <option value="no_helmet">No Helmet</option>
+                <option value="no_vest">No Vest</option>
+            </select>
+            
+            <label>Date:</label>
+            <input type="date" id="dateFilter" onchange="filterData()">
+        </div>
+        
+        <div class="table-container">
+            <h2 style="margin-bottom: 20px;">Violation History</h2>
+            <div id="loadingMessage" class="loading">Loading violations...</div>
+            <div id="noDataMessage" class="no-data" style="display: none;">
+                No violations recorded yet. System is monitoring...
+            </div>
+            <table id="violationsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Person ID</th>
+                        <th>Violation Type</th>
+                        <th>Camera Area</th>
+                        <th>Frames</th>
+                    </tr>
+                </thead>
+                <tbody id="violationsBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        let allViolations = [];
+        
+        async function loadViolations() {
+            try {
+                const response = await fetch('/violations/view');
+                const data = await response.json();
+                allViolations = data.violations;
+                
+                if (allViolations.length === 0) {
+                    document.getElementById('loadingMessage').style.display = 'none';
+                    document.getElementById('noDataMessage').style.display = 'block';
+                    return;
+                }
+                
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('violationsTable').style.display = 'table';
+                
+                // Populate camera filter
+                const cameras = [...new Set(allViolations.map(v => v.Camera_Area))].sort();
+                const cameraFilter = document.getElementById('cameraFilter');
+                
+                // Clear existing options except "All Cameras"
+                const allCamerasOption = cameraFilter.querySelector('option[value="all"]');
+                cameraFilter.innerHTML = '';
+                cameraFilter.appendChild(allCamerasOption);
+                
+                // Add unique camera options
+                cameras.forEach(camera => {
+                    if (camera) {  // Skip empty/null values
+                        const option = document.createElement('option');
+                        option.value = camera;
+                        option.textContent = camera;
+                        cameraFilter.appendChild(option);
+                    }
+                });
+                
+                displayViolations(allViolations);
+                loadStats();
+            } catch (error) {
+                console.error('Error loading violations:', error);
+                document.getElementById('loadingMessage').textContent = 'Error loading violations';
+            }
+        }
+        
+        function displayViolations(violations) {
+            const tbody = document.getElementById('violationsBody');
+            tbody.innerHTML = '';
+            
+            // Show most recent first
+            violations.reverse().forEach(v => {
+                const row = document.createElement('tr');
+                
+                const badge = v.Violation_Type.includes('helmet') ? 
+                    '<span class="badge badge-danger">No Helmet</span>' :
+                    '<span class="badge badge-warning">No Vest</span>';
+                
+                row.innerHTML = `
+                    <td>${v.Timestamp}</td>
+                    <td>${v.Date}</td>
+                    <td>${v.Time}</td>
+                    <td><strong>Person ${v.Person_ID}</strong></td>
+                    <td>${badge}</td>
+                    <td>${v.Camera_Area}</td>
+                    <td>${v.Frame_Count}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        async function loadStats() {
+            try {
+                const response = await fetch('/violations/stats');
+                const stats = await response.json();
+                
+                document.getElementById('totalViolations').textContent = stats.total;
+                document.getElementById('noHelmet').textContent = stats.no_helmet;
+                document.getElementById('noVest').textContent = stats.no_vest;
+                document.getElementById('cameraCount').textContent = Object.keys(stats.by_camera).length;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+        
+        function filterData() {
+            const cameraFilter = document.getElementById('cameraFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+            
+            let filtered = allViolations;
+            
+            if (cameraFilter !== 'all') {
+                filtered = filtered.filter(v => v.Camera_Area === cameraFilter);
+            }
+            
+            if (typeFilter !== 'all') {
+                filtered = filtered.filter(v => v.Violation_Type.includes(typeFilter));
+            }
+            
+            if (dateFilter) {
+                filtered = filtered.filter(v => v.Date === dateFilter);
+            }
+            
+            displayViolations([...filtered]); // Clone to avoid mutating
+        }
+        
+        function refreshData() {
+            document.getElementById('loadingMessage').style.display = 'block';
+            document.getElementById('violationsTable').style.display = 'none';
+            loadViolations();
+        }
+        
+        async function resetViolations() {
+            // Show confirmation dialog
+            const confirmed = confirm(
+                '⚠️ Warning: This will DELETE all violation records!\n\n' +
+                '✓ Old data will be backed up with timestamp\n' +
+                '✓ CSV and JSON files will be cleared\n' +
+                '✓ Dashboard will show 0 violations\n\n' +
+                'Are you sure you want to continue?'
+            );
+            
+            if (!confirmed) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/violations/reset', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✓ Success!\n\nAll violations cleared successfully.\n' + 
+                          (result.backup_csv ? `Backup saved: ${result.backup_csv}` : ''));
+                    
+                    // Reload the page to show empty state
+                    window.location.reload();
+                } else {
+                    alert('✗ Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error resetting violations:', error);
+                alert('✗ Error: Failed to reset violations. Check console for details.');
+            }
+        }
+        
+        // Auto-refresh every 10 seconds
+        setInterval(() => {
+            loadViolations();
+        }, 10000);
+        
+        // Load on page load
+        loadViolations();
+    </script>
+</body>
+</html>
