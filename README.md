@@ -164,9 +164,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Flask](https://flask.palletsprojects.com/) for the web framework
 - [OpenCV](https://opencv.org/) for computer vision operations
 
----
-
-<div align="center">
-  <p>Made with ❤️ by Your Name</p>
-  <p>💡 For support, please open an issue or contact support@example.com</p>
-</div>
