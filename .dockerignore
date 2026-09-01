@@ -1,0 +1,21 @@
+.git
+.gitignore
+.venv
+venv
+__pycache__/
+*.pyc
+
+# Demo/docs assets not needed at runtime
+Demo.mp4
+README.md
+LICENSE
+
+# YOLO training artifacts (only weights/ is needed to run inference)
+models/exp9/*.png
+models/exp9/*.jpg
+models/exp9/*.csv
+models/exp9/*.yaml
+models/exp9/events.out.tfevents*
+
+# Local dev/test outputs
+data/violations_backup_*

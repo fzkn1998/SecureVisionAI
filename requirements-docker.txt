@@ -1,0 +1,16 @@
+# Cleaned, container-specific dependency list.
+# The original requirements.txt is a dump of a full local Anaconda
+# environment (includes conda/anaconda-* packages, Windows-only packages
+# like pywin32-ctypes/win_inet_pton, etc.) and is not suitable for a
+# Linux container build. This file lists only what app.py actually needs;
+# ultralytics/torch/flask pull in their own compatible sub-dependencies
+# (matplotlib, pandas, scipy, pyyaml, tqdm, requests, ...).
+
+Flask==3.1.2
+numpy==2.2.6
+opencv-python-headless==4.12.0.88
+pillow==12.0.0
+torch==2.9.1
+torchvision==0.24.1
+ultralytics==8.3.233
+python-dotenv==1.1.0

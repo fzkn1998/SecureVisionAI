@@ -1,0 +1,45 @@
+FROM python:3.11-slim-bookworm
+
+# System libs needed by opencv-python-headless / ffmpeg video decoding
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    ffmpeg \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Install Python deps first so this layer is cached unless requirements change.
+# CUDA-enabled torch build (cu126) so YOLO auto-detects and uses the GPU
+# via the host's NVIDIA driver + nvidia-container-toolkit (run with --gpus all).
+COPY requirements-docker.txt .
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cu126 torch==2.9.1 torchvision==0.24.1 \
+    && pip install --no-cache-dir -r requirements-docker.txt
+
+# App code, models, templates, static assets, seed data
+COPY app.py .
+COPY models/ ./models/
+COPY templates/ ./templates/
+COPY static/ ./static/
+COPY data/ ./data/
+COPY scripts/ ./scripts/
+
+# Persist violation logs / video files across container restarts
+VOLUME ["/app/data"]
+
+RUN useradd --create-home --uid 1000 appuser \
+    && chown -R appuser:appuser /app
+USER appuser
+
+ENV PORT=5000
+EXPOSE 5000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:${PORT}/stats || exit 1
+
+CMD ["python", "app.py"]

@@ -1,0 +1,22 @@
+services:
+  securevision-ai:
+    build:
+      context: .
+      dockerfile: DockerFile
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+    volumes:
+      - securevision-data:/app/data
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  securevision-data:
